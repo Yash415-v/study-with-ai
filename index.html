@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studley AI - 1-Day Exam Cram Studio | Free Flashcards, Audio Clips & Exam Q&A</title>
+  <meta name="description" content="AI study platform for students preparing 1 day before exams. Upload any PDF notes and instantly generate active recall flashcards, audio podcast clips, high-yield exam questions, and emergency cheat sheets for free.">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body class="dark-theme">
+  <!-- Background Glow Orbs -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <!-- Top Announcement Bar -->
+  <div class="urgent-banner">
+    <div class="urgent-inner">
+      <span class="badge-pulse"><i class="fa-solid fa-bolt"></i> CRAM MODE</span>
+      <span>Studying 1 day before your exam? We focus strictly on the top 20% content that yields 80% of marks!</span>
+      <span class="free-pill"><i class="fa-solid fa-gift"></i> 100% Free of Cost</span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="logo-icon">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="brand-text">
+          <div class="brand-name">Studley<span class="ai-badge">AI</span></div>
+          <span class="brand-tag">Night-Before Exam Prep</span>
+        </div>
+      </div>
+
+      <!-- Cram Timer Bar -->
+      <div class="cram-timer-widget" id="cramTimerWidget" title="Click to customize exam time">
+        <div class="timer-label"><i class="fa-regular fa-clock"></i> EXAM COUNTDOWN:</div>
+        <div class="timer-digits" id="timerDigits">14h 32m 45s</div>
+        <button class="timer-edit-btn" id="editTimerBtn" title="Set Exam Time"><i class="fa-solid fa-pen"></i></button>
+      </div>
+
+      <!-- Header Actions -->
+      <div class="nav-actions">
+        <button class="icon-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <button class="icon-btn" id="settingsBtn" title="API Settings">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+        <button class="btn-primary" id="startCramHeaderBtn">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> New Cram Session
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-layout">
+    
+    <!-- Hero / Upload Section (Visible when no pack loaded or when toggled) -->
+    <section class="upload-hero-section" id="uploadHeroSection">
+      <div class="hero-header text-center">
+        <div class="hero-chip">
+          <i class="fa-solid fa-fire"></i> THE ULTIMATE LAST-MINUTE REVISION ENGINE
+        </div>
+        <h1 class="hero-title">
+          Ace Your Exam <span class="gradient-text">Tomorrow Morning</span>
+        </h1>
+        <p class="hero-subtitle">
+          Upload any lecture PDF, textbook chapter, or slides. Studley AI extracts <strong>high-yield flashcards</strong>, produces a <strong>two-speaker audio podcast</strong>, and generates the <strong>exact exam questions</strong> you'll be graded on.
+        </p>
+      </div>
+
+      <!-- Ingestion Card -->
+      <div class="ingestion-card">
+        <!-- Input Tabs -->
+        <div class="input-tabs">
+          <button class="tab-btn active" data-tab="pdf-upload">
+            <i class="fa-regular fa-file-pdf"></i> Upload PDF / Notes
+          </button>
+          <button class="tab-btn" data-tab="paste-text">
+            <i class="fa-solid fa-align-left"></i> Paste Text / Syllabus
+          </button>
+          <button class="tab-btn" data-tab="sample-packs">
+            <i class="fa-solid fa-sparkles"></i> 1-Click Instant Demo
+          </button>
+        </div>
+
+        <!-- Tab 1: PDF Upload -->
+        <div class="tab-panel active" id="tab-pdf-upload">
+          <div class="dropzone" id="pdfDropzone">
+            <input type="file" id="pdfFileInput" accept=".pdf,application/pdf" style="display: none;">
+            <div class="dropzone-content">
+              <div class="drop-icon">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+              </div>
+              <h3>Drag & drop your PDF lecture notes here</h3>
+              <p>Supports syllabus PDFs, textbook chapters, slides, or class notes (Up to 100MB)</p>
+              <div class="drop-actions">
+                <button type="button" class="btn-browse" id="browsePdfBtn">
+                  <i class="fa-solid fa-folder-open"></i> Browse Files
+                </button>
+              </div>
+              <div class="file-badges">
+                <span><i class="fa-solid fa-shield-halved"></i> 100% Free</span>
+                <span><i class="fa-solid fa-bolt"></i> Instant Ingestion</span>
+                <span><i class="fa-solid fa-lock"></i> Client-Side Safe</span>
+              </div>
+            </div>
+            <!-- File selected status -->
+            <div class="file-selected-status" id="fileSelectedStatus" style="display: none;">
+              <div class="selected-file-info">
+                <i class="fa-solid fa-file-pdf file-icon"></i>
+                <div>
+                  <div class="filename" id="selectedFileName">syllabus.pdf</div>
+                  <div class="filesize" id="selectedFileSize">2.4 MB</div>
+                </div>
+              </div>
+              <button class="btn-remove" id="removeFileBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Paste Text -->
+        <div class="tab-panel" id="tab-paste-text">
+          <div class="paste-container">
+            <input type="text" id="pasteDocTitle" class="doc-title-input" placeholder="Subject Title (e.g., Organic Chemistry Chapter 4)">
+            <textarea id="pasteTextInput" class="cram-textarea" placeholder="Paste your raw lecture notes, chapter summary, definitions, or copied slides here..."></textarea>
+          </div>
+        </div>
+
+        <!-- Tab 3: Sample Packs (1-Click Instant) -->
+        <div class="tab-panel" id="tab-sample-packs">
+          <div class="sample-packs-grid">
+            <div class="sample-card" data-sample="os_csci">
+              <div class="sample-icon cs-bg"><i class="fa-solid fa-laptop-code"></i></div>
+              <div class="sample-content">
+                <h4>Operating Systems & Concurrency</h4>
+                <p>Deadlocks, Coffman Conditions, Thrashing, Page Replacement, Semaphores.</p>
+                <div class="sample-tags">
+                  <span>CS 301</span>
+                  <span>6 Cards</span>
+                  <span>Audio Ready</span>
+                </div>
+              </div>
+              <button class="btn-load-sample">Load <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+
+            <div class="sample-card" data-sample="bio_genetics">
+              <div class="sample-icon bio-bg"><i class="fa-solid fa-dna"></i></div>
+              <div class="sample-content">
+                <h4>Cellular Biology & Genetics</h4>
+                <p>Cellular Respiration, ATP Synthase, DNA Replication enzymes, Mitosis vs Meiosis.</p>
+                <div class="sample-tags">
+                  <span>Bio 101</span>
+                  <span>4 Cards</span>
+                  <span>Audio Ready</span>
+                </div>
+              </div>
+              <button class="btn-load-sample">Load <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Process Button Bar -->
+        <div class="ingestion-footer">
+          <div class="options-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="includeAudioCheck" checked>
+              <span>Generate Audio Podcast Clip</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="includeCheatSheetCheck" checked>
+              <span>5-Min Emergency Cheat Sheet</span>
+            </label>
+          </div>
+          <button class="btn-generate" id="generateCramPackBtn">
+            <i class="fa-solid fa-bolt-lightning"></i> Generate 1-Day Cram Studio
+          </button>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+          <div class="loading-spinner"></div>
+          <h3 id="loadingStatusText">Analyzing PDF & Extracting Key Concepts...</h3>
+          <p id="loadingSubtext">Building high-yield flashcards, exam questions & podcast dialogue...</p>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progressBarFill"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Study Studio Dashboard (Visible after pack is loaded) -->
+    <section class="study-dashboard" id="studyDashboard" style="display: none;">
+      
+      <!-- Pack Summary Header Banner -->
+      <div class="dashboard-header-card">
+        <div class="dashboard-header-left">
+          <div class="exam-status-pill">
+            <i class="fa-solid fa-bell"></i> EXAM PREPARATION ACTIVE
+          </div>
+          <h2 class="pack-title" id="dashboardPackTitle">Operating Systems & Concurrency</h2>
+          <p class="pack-summary" id="dashboardPackSummary">
+            High-yield concepts on Process Scheduling, Deadlocks, Virtual Memory Paging, and Semaphores.
+          </p>
+          <div class="pack-meta-row">
+            <span class="meta-item"><i class="fa-solid fa-file-lines"></i> <span id="metaPages">12</span> Pages</span>
+            <span class="meta-item"><i class="fa-solid fa-align-left"></i> <span id="metaWords">1,850</span> Words</span>
+            <span class="meta-item"><i class="fa-solid fa-stopwatch"></i> <span id="metaReadTime">6</span> Min Read</span>
+            <span class="meta-item high-yield"><i class="fa-solid fa-bullseye"></i> 94% High-Yield Score</span>
+          </div>
+        </div>
+        <div class="dashboard-header-right">
+          <button class="btn-action-outline" id="printCheatSheetTopBtn">
+            <i class="fa-solid fa-print"></i> Print Cheat Sheet
+          </button>
+          <button class="btn-action-outline" id="switchSubjectBtn">
+            <i class="fa-solid fa-rotate"></i> Change PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Study Feature Navigation Tabs -->
+      <div class="study-nav-tabs">
+        <button class="study-tab-btn active" data-view="flashcards">
+          <i class="fa-solid fa-layer-group"></i> Active Recall Flashcards
+          <span class="tab-counter" id="cardsCountBadge">6</span>
+        </button>
+        <button class="study-tab-btn" data-view="audio">
+          <i class="fa-solid fa-headphones"></i> Audio Podcast Review
+          <span class="tab-badge-live"><i class="fa-solid fa-circle"></i> Audio</span>
+        </button>
+        <button class="study-tab-btn" data-view="questions">
+          <i class="fa-solid fa-star"></i> High-Yield Exam Questions
+          <span class="tab-counter" id="questionsCountBadge">3</span>
+        </button>
+        <button class="study-tab-btn" data-view="quiz">
+          <i class="fa-solid fa-list-check"></i> Practice Test / Quiz
+          <span class="tab-counter" id="quizCountBadge">4</span>
+        </button>
+        <button class="study-tab-btn" data-view="cheatsheet">
+          <i class="fa-solid fa-receipt"></i> 5-Min Cheat Sheet
+        </button>
+      </div>
+
+      <!-- VIEW 1: FLASHCARDS -->
+      <div class="study-view active" id="view-flashcards">
+        <div class="flashcards-container">
+          <!-- Toolbar -->
+          <div class="flashcards-toolbar">
+            <div class="filter-pills">
+              <button class="filter-pill active" data-filter="all">All (<span id="allCardsCount">6</span>)</button>
+              <button class="filter-pill" data-filter="unmastered">Need Review (<span id="unmasteredCount">6</span>)</button>
+              <button class="filter-pill" data-filter="mastered">Mastered (<span id="masteredCount">0</span>)</button>
+            </div>
+            <div class="card-controls-right">
+              <button class="tool-btn" id="shuffleCardsBtn" title="Shuffle Cards"><i class="fa-solid fa-shuffle"></i> Shuffle</button>
+              <button class="tool-btn" id="exportCardsBtn" title="Export to CSV/Anki"><i class="fa-solid fa-download"></i> Export Anki</button>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="mastery-progress-bar">
+            <div class="progress-info">
+              <span>Exam Readiness Progress: <strong id="progressPercent">0%</strong></span>
+              <span id="progressStats">0 of 6 Mastered</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" id="masteryBarFill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- 3D Interactive Flashcard Stage -->
+          <div class="card-stage">
+            <div class="flashcard-3d" id="activeFlashcard">
+              <!-- Front Side -->
+              <div class="card-face card-front">
+                <div class="card-top-bar">
+                  <span class="card-category" id="cardCategory">Deadlocks</span>
+                  <span class="card-difficulty hard" id="cardDifficulty">Hard</span>
+                </div>
+                <div class="card-body">
+                  <div class="card-question-text" id="cardFrontText">
+                    What are the 4 Coffman conditions required for a Deadlock to occur?
+                  </div>
+                </div>
+                <div class="card-bottom-bar">
+                  <span class="hint-text"><i class="fa-regular fa-hand-pointer"></i> Click card or press [Space] to flip</span>
+                  <div class="card-number" id="cardNumberIndicator">1 / 6</div>
+                </div>
+              </div>
+
+              <!-- Back Side -->
+              <div class="card-face card-back">
+                <div class="card-top-bar">
+                  <span class="card-category">Model Answer</span>
+                  <span class="card-tip-badge"><i class="fa-solid fa-lightbulb"></i> Exam Tip</span>
+                </div>
+                <div class="card-body">
+                  <div class="card-answer-text" id="cardBackText">
+                    1. Mutual Exclusion<br>2. Hold and Wait<br>3. No Preemption<br>4. Circular Wait.<br>Breaking ANY one prevents deadlock!
+                  </div>
+                  <div class="card-exam-tip" id="cardExamTip">
+                    Very common 5-mark question! Remember mnemonic: 'Mutual Hold No Circle'.
+                  </div>
+                </div>
+                <div class="card-bottom-bar">
+                  <span class="hint-text"><i class="fa-solid fa-rotate"></i> Click to flip back</span>
+                  <div class="card-number" id="cardNumberIndicatorBack">1 / 6</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation & Mastery Action Bar -->
+          <div class="card-actions-bar">
+            <button class="nav-arrow-btn" id="prevCardBtn" title="Previous Card (Left Arrow)">
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+
+            <div class="mastery-decision-btns">
+              <button class="btn-cram-rate unmastered" id="markUnmasteredBtn">
+                <i class="fa-solid fa-circle-xmark"></i> Still Learning [1]
+              </button>
+              <button class="btn-cram-rate flip-btn" id="flipCardActionBtn">
+                <i class="fa-solid fa-arrows-rotate"></i> Flip Answer [Space]
+              </button>
+              <button class="btn-cram-rate mastered" id="markMasteredBtn">
+                <i class="fa-solid fa-circle-check"></i> Mastered! [2]
+              </button>
+            </div>
+
+            <button class="nav-arrow-btn" id="nextCardBtn" title="Next Card (Right Arrow)">
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+          <!-- Quick Keyboard Shortcut Legend -->
+          <div class="shortcut-legend">
+            <span><kbd>Space</kbd> Flip</span>
+            <span><kbd>&larr;</kbd> Previous</span>
+            <span><kbd>&rarr;</kbd> Next</span>
+            <span><kbd>1</kbd> Need Review</span>
+            <span><kbd>2</kbd> Mastered</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: AUDIO PODCAST & CLIPS -->
+      <div class="study-view" id="view-audio">
+        <div class="audio-studio-container">
+          <div class="podcast-player-card">
+            <div class="player-cover-row">
+              <div class="podcast-album-art">
+                <i class="fa-solid fa-headphones-simple"></i>
+                <div class="wave-bars-mini" id="miniWaveAnim">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+              <div class="podcast-info">
+                <div class="podcast-tag"><i class="fa-solid fa-podcast"></i> HIGH-YIELD CRASH PODCAST</div>
+                <h3 class="podcast-title" id="podcastTitle">Night Before OS Exam: 7-Minute High-Yield Cram Session</h3>
+                <div class="podcast-speakers">
+                  <span><i class="fa-solid fa-user"></i> Host: <strong id="podcastHost">Alex</strong></span>
+                  <span><i class="fa-solid fa-user-tie"></i> Specialist: <strong id="podcastCohost">Prof. Taylor</strong></span>
+                  <span class="badge-free-tts"><i class="fa-solid fa-check"></i> Free Web Voice Engine</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Audio Waveform Visualizer -->
+            <div class="visualizer-container">
+              <canvas id="waveformCanvas" width="700" height="60"></canvas>
+            </div>
+
+            <!-- Scrubber & Time -->
+            <div class="scrubber-row">
+              <span class="time-label" id="audioCurrentTime">00:00</span>
+              <div class="scrubber-track" id="scrubberTrack">
+                <div class="scrubber-progress" id="scrubberProgress" style="width: 0%;"></div>
+              </div>
+              <span class="time-label" id="audioTotalTime">04:30</span>
+            </div>
+
+            <!-- Player Controls -->
+            <div class="audio-controls-row">
+              <div class="controls-left">
+                <!-- Voice Speed selector -->
+                <div class="speed-selector">
+                  <span class="speed-label"><i class="fa-solid fa-gauge-high"></i></span>
+                  <button class="speed-btn active" data-speed="1.0">1x</button>
+                  <button class="speed-btn" data-speed="1.25">1.25x</button>
+                  <button class="speed-btn" data-speed="1.5">1.5x</button>
+                  <button class="speed-btn" data-speed="2.0">2x</button>
+                </div>
+              </div>
+
+              <div class="controls-center">
+                <button class="audio-circle-btn skip-btn" id="rewindBtn" title="Rewind 10 Seconds">
+                  <i class="fa-solid fa-rotate-left"></i> <span>10s</span>
+                </button>
+                <button class="audio-circle-btn play-main-btn" id="playAudioBtn">
+                  <i class="fa-solid fa-play" id="playIcon"></i>
+                </button>
+                <button class="audio-circle-btn skip-btn" id="forwardBtn" title="Forward 10 Seconds">
+                  <i class="fa-solid fa-rotate-right"></i> <span>10s</span>
+                </button>
+              </div>
+
+              <div class="controls-right">
+                <button class="tool-btn" id="downloadTranscriptBtn" title="Download Audio Transcript">
+                  <i class="fa-solid fa-file-arrow-down"></i> Script
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Synchronized Transcript -->
+          <div class="transcript-section">
+            <div class="transcript-header">
+              <h4><i class="fa-solid fa-align-left"></i> Synchronized Script & Chapters (Click line to play)</h4>
+              <span class="auto-scroll-status"><i class="fa-solid fa-arrows-up-down"></i> Auto-follows voice</span>
+            </div>
+            <div class="transcript-list" id="transcriptList">
+              <!-- Dynamically populated dialogue lines -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: HIGH-YIELD EXAM QUESTIONS -->
+      <div class="study-view" id="view-questions">
+        <div class="questions-container">
+          <div class="section-notice">
+            <i class="fa-solid fa-award"></i>
+            <div>
+              <strong>Guaranteed Exam Weightage</strong>: These questions represent core concepts that examiners test year after year. Memorize the <em>keywords</em> in the model answers!
+            </div>
+          </div>
+
+          <div class="questions-list" id="questionsList">
+            <!-- Dynamically populated questions -->
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: PRACTICE TEST / QUIZ -->
+      <div class="study-view" id="view-quiz">
+        <div class="quiz-container">
+          <div class="quiz-header-bar">
+            <div>
+              <h3><i class="fa-solid fa-list-check"></i> Instant 1-Day Practice Test</h3>
+              <p>Simulate exam conditions with immediate feedback and explanation.</p>
+            </div>
+            <div class="quiz-score-pill">
+              Score: <strong id="quizScoreText">0 / 0</strong>
+            </div>
+          </div>
+
+          <div class="quiz-body" id="quizBody">
+            <!-- Dynamically populated MCQ items -->
+          </div>
+
+          <div class="quiz-footer">
+            <button class="btn-primary" id="resetQuizBtn">
+              <i class="fa-solid fa-rotate-left"></i> Retake Practice Quiz
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 5: 5-MINUTE CHEAT SHEET -->
+      <div class="study-view" id="view-cheatsheet">
+        <div class="cheatsheet-container">
+          <div class="cheatsheet-paper" id="cheatSheetPaper">
+            <div class="cheatsheet-header">
+              <div class="cs-logo">STUDLEY AI // EMERGENCY REVISION CHEAT SHEET</div>
+              <h2 id="csTitle">5-Minute Night-Before Cheat Sheet</h2>
+              <div class="cs-tagline">DO NOT READ ENTIRE TEXTBOOK. Memorize these golden bullets right outside the exam hall!</div>
+            </div>
+
+            <div class="cs-body" id="csBody">
+              <!-- Bullets inserted dynamically -->
+            </div>
+
+            <div class="cs-footer">
+              <span>Generated with Studley AI - 1-Day Exam Prep</span>
+              <span>Good luck! Believe in yourself and trust your preparation.</span>
+            </div>
+          </div>
+
+          <div class="cheatsheet-actions">
+            <button class="btn-primary" id="printSheetActionBtn">
+              <i class="fa-solid fa-print"></i> Print / Save as PDF
+            </button>
+            <button class="btn-action-outline" id="copySheetActionBtn">
+              <i class="fa-solid fa-copy"></i> Copy to Clipboard
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Sticky AI Study Buddy Widget (Floating Action Button) -->
+  <div class="cram-buddy-float">
+    <button class="buddy-bubble-btn" id="buddyToggleBtn" title="Ask Cram AI Tutor">
+      <i class="fa-solid fa-comment-dots"></i>
+      <span class="bubble-pulse"></span>
+    </button>
+    <div class="buddy-chat-window" id="buddyChatWindow" style="display: none;">
+      <div class="buddy-header">
+        <div class="buddy-info">
+          <div class="buddy-avatar"><i class="fa-solid fa-robot"></i></div>
+          <div>
+            <div class="buddy-name">Exam Buddy AI</div>
+            <div class="buddy-status"><i class="fa-solid fa-circle"></i> Online • Instant Answers</div>
+          </div>
+        </div>
+        <button class="buddy-close-btn" id="buddyCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="buddy-messages" id="buddyMessages">
+        <div class="buddy-msg bot">
+          <p>Hey! Nervous about tomorrow's exam? Don't panic. Ask me for a <strong>mnemonic</strong>, <strong>high-yield summary</strong>, or to explain any tricky concept simply!</p>
+        </div>
+      </div>
+      <div class="buddy-quick-prompts">
+        <button class="prompt-chip" data-prompt="Give me a mnemonic to remember this">💡 Mnemonic?</button>
+        <button class="prompt-chip" data-prompt="How to pass 1 day before exam?">⚡ 1-Day strategy</button>
+        <button class="prompt-chip" data-prompt="Explain this in 30 seconds">⏱️ 30s summary</button>
+      </div>
+      <div class="buddy-input-bar">
+        <input type="text" id="buddyInput" placeholder="Ask urgent question...">
+        <button id="buddySendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal (Optional Gemini API key for extra power) -->
+  <div class="modal-backdrop" id="settingsModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-sliders"></i> Studley AI Settings</h3>
+        <button class="modal-close-btn" id="closeSettingsBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-item">
+          <label><strong>Google Gemini Free API Key (Optional)</strong></label>
+          <p class="setting-desc">Studley AI works 100% free with the local smart heuristic engine out of the box! If you want custom Gemini LLM responses, paste a free key from Google AI Studio.</p>
+          <input type="password" id="geminiApiKeyInput" class="setting-input" placeholder="AIzaSy... (Leave empty to use 100% free local engine)">
+        </div>
+        <div class="setting-item">
+          <label><strong>Voice Engine Preferences</strong></label>
+          <p class="setting-desc">Choose speech synthesis voice for the audio podcast player.</p>
+          <select id="voiceSelect" class="setting-input">
+            <option value="">Browser Default Voice</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="saveSettingsBtn">Save Preferences</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timer Modal -->
+  <div class="modal-backdrop" id="timerModal" style="display: none;">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <h3><i class="fa-regular fa-clock"></i> Set Your Exam Time</h3>
+        <button class="modal-close-btn" id="closeTimerModalBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <label>Select exam date and start time:</label>
+        <input type="datetime-local" id="examDateTimeInput" class="setting-input">
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="saveTimerBtn">Update Countdown</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

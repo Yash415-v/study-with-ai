@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>Studley AI - 1-Day Exam Cram Studio | Free Flashcards, Audio Clips & Exam Q&A</title>
   <meta name="description" content="AI study platform for students preparing 1 day before exams. Upload any PDF notes and instantly generate active recall flashcards, audio podcast clips, high-yield exam questions, and emergency cheat sheets for free.">
   <link rel="stylesheet" href="styles.css">
@@ -12,6 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- PDF.js for 100% Client-Side PDF Parsing on Mobile & GitHub Pages -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
@@ -21,11 +23,12 @@
   <div class="bg-glow bg-glow-2"></div>
 
   <!-- Top Announcement Bar -->
-  <div class="urgent-banner">
+  <div class="urgent-banner" id="urgentBanner">
     <div class="urgent-inner">
       <span class="badge-pulse"><i class="fa-solid fa-bolt"></i> CRAM MODE</span>
       <span>Studying 1 day before your exam? We focus strictly on the top 20% content that yields 80% of marks!</span>
       <span class="free-pill"><i class="fa-solid fa-gift"></i> 100% Free of Cost</span>
+      <button class="banner-close-btn" id="dismissBannerBtn" aria-label="Dismiss announcement"><i class="fa-solid fa-xmark"></i></button>
     </div>
   </div>
 
@@ -44,7 +47,7 @@
 
       <!-- Cram Timer Bar -->
       <div class="cram-timer-widget" id="cramTimerWidget" title="Click to customize exam time">
-        <div class="timer-label"><i class="fa-regular fa-clock"></i> EXAM COUNTDOWN:</div>
+        <div class="timer-label"><i class="fa-regular fa-clock"></i> <span class="timer-title-text">EXAM COUNTDOWN:</span></div>
         <div class="timer-digits" id="timerDigits">14h 32m 45s</div>
         <button class="timer-edit-btn" id="editTimerBtn" title="Set Exam Time"><i class="fa-solid fa-pen"></i></button>
       </div>
@@ -57,8 +60,8 @@
         <button class="icon-btn" id="settingsBtn" title="API Settings">
           <i class="fa-solid fa-gear"></i>
         </button>
-        <button class="btn-primary" id="startCramHeaderBtn">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> New Cram Session
+        <button class="btn-primary" id="startCramHeaderBtn" title="New Cram Session">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="nav-btn-text">New Cram Session</span>
         </button>
       </div>
     </div>
@@ -86,26 +89,26 @@
         <!-- Input Tabs -->
         <div class="input-tabs">
           <button class="tab-btn active" data-tab="pdf-upload">
-            <i class="fa-regular fa-file-pdf"></i> Upload PDF / Notes
+            <i class="fa-regular fa-file-pdf"></i> <span>Upload PDF</span>
           </button>
           <button class="tab-btn" data-tab="paste-text">
-            <i class="fa-solid fa-align-left"></i> Paste Text / Syllabus
+            <i class="fa-solid fa-align-left"></i> <span>Paste Notes</span>
           </button>
           <button class="tab-btn" data-tab="sample-packs">
-            <i class="fa-solid fa-sparkles"></i> 1-Click Instant Demo
+            <i class="fa-solid fa-sparkles"></i> <span>Demo Packs</span>
           </button>
         </div>
 
         <!-- Tab 1: PDF Upload -->
         <div class="tab-panel active" id="tab-pdf-upload">
           <div class="dropzone" id="pdfDropzone">
-            <input type="file" id="pdfFileInput" accept=".pdf,application/pdf" style="display: none;">
+            <input type="file" id="pdfFileInput" accept=".pdf,.txt,.md,text/plain,application/pdf" style="display: none;">
             <div class="dropzone-content">
               <div class="drop-icon">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
               </div>
-              <h3>Drag & drop your PDF lecture notes here</h3>
-              <p>Supports syllabus PDFs, textbook chapters, slides, or class notes (Up to 100MB)</p>
+              <h3 class="dropzone-title">Tap to upload or drop lecture notes</h3>
+              <p class="dropzone-subtitle">Supports PDF notes, syllabus slides, or TXT files (Up to 100MB)</p>
               <div class="drop-actions">
                 <button type="button" class="btn-browse" id="browsePdfBtn">
                   <i class="fa-solid fa-folder-open"></i> Browse Files
@@ -114,6 +117,7 @@
               <div class="file-badges">
                 <span><i class="fa-solid fa-shield-halved"></i> 100% Free</span>
                 <span><i class="fa-solid fa-bolt"></i> Instant Ingestion</span>
+                <span><i class="fa-solid fa-mobile-screen"></i> Mobile Ready</span>
                 <span><i class="fa-solid fa-lock"></i> Client-Side Safe</span>
               </div>
             </div>
@@ -330,14 +334,14 @@
             </button>
 
             <div class="mastery-decision-btns">
-              <button class="btn-cram-rate unmastered" id="markUnmasteredBtn">
-                <i class="fa-solid fa-circle-xmark"></i> Still Learning [1]
+              <button class="btn-cram-rate unmastered" id="markUnmasteredBtn" title="Need review (Key 1)">
+                <i class="fa-solid fa-circle-xmark"></i> <span class="rate-btn-text">Need Review</span><span class="rate-shortcut"> [1]</span>
               </button>
-              <button class="btn-cram-rate flip-btn" id="flipCardActionBtn">
-                <i class="fa-solid fa-arrows-rotate"></i> Flip Answer [Space]
+              <button class="btn-cram-rate flip-btn" id="flipCardActionBtn" title="Flip card (Space)">
+                <i class="fa-solid fa-arrows-rotate"></i> <span class="rate-btn-text">Flip Answer</span><span class="rate-shortcut"> [Space]</span>
               </button>
-              <button class="btn-cram-rate mastered" id="markMasteredBtn">
-                <i class="fa-solid fa-circle-check"></i> Mastered! [2]
+              <button class="btn-cram-rate mastered" id="markMasteredBtn" title="Mastered (Key 2)">
+                <i class="fa-solid fa-circle-check"></i> <span class="rate-btn-text">Mastered!</span><span class="rate-shortcut"> [2]</span>
               </button>
             </div>
 
@@ -592,6 +596,7 @@
     </div>
   </div>
 
+  <script src="samples.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
